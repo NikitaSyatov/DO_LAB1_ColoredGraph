@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(MyProject
+project(ColoringSolver
     VERSION 1.0.0
     DESCRIPTION "My C++ Project"
     LANGUAGES CXX
@@ -9,6 +9,9 @@ project(MyProject
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(BUILD_BIN_DIR ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_BIN_DIR})
 
 # Опции компиляции
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
