@@ -15,13 +15,6 @@ using namespace std;
 class ColoringProblem
 {
 public:
-    int GetRandom(int a, int b)
-    {
-        static mt19937 generator;
-        uniform_int_distribution<int> uniform(a, b);
-        return uniform(generator);
-    }
-
     void ReadGraphFile(string filename)
     {
         ifstream fin(INDIR + filename);
@@ -42,6 +35,10 @@ public:
                 line_input >> command >> type >> vertices >> edges;
                 neighbour_sets.resize(vertices);
                 colors.resize(vertices + 1);
+                for (auto& c : colors)
+                {
+                    c = -1;
+                }
             }
             else
             {
@@ -52,39 +49,49 @@ public:
                 neighbour_sets[finish - 1].insert(start - 1);
             }
         }
-        // std::cout << vertices << std::endl;  DEBUG
     }
 
     void GreedyGraphColoring()
     {
         vector<int> uncolored_vertices(neighbour_sets.size());
+        vector<pair<int, int>> degree_vertices(neighbour_sets.size());
         for (size_t i = 0; i < uncolored_vertices.size(); ++i)
-            uncolored_vertices[i] = i;
+        {
+            degree_vertices[i] = make_pair<int, int>(neighbour_sets[i].size(), i);
+        }
+        std::sort(degree_vertices.begin(), degree_vertices.end(), 
+                 [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+                     return a.first < b.first;
+                 });
 
         int color = 1;
-        int current_maxcolor = 1;
+        int count = 0;
 
-        while (! uncolored_vertices.empty())
+        while (count < neighbour_sets.size())
         {
-            int index = GetRandom(0, uncolored_vertices.size() - 1);
-            int vertex = uncolored_vertices[index];
-            
-            for (int neighbour : neighbour_sets[vertex])
+            for (int i = degree_vertices.size()-1; i >= 0; --i)
             {
-                if (color == colors[neighbour])
+                int vertex = degree_vertices[i].second;
+                if (colors[vertex] == -1)
                 {
-                    color = ++current_maxcolor;
-                    break;
+                    bool iscolored = true;
+                    for (int neighbour : neighbour_sets[vertex])
+                    {
+                        if (colors[neighbour] == color)
+                        {
+                            iscolored = false;
+                            break;
+                        }
+                    }
+                    if (iscolored)
+                    {
+                        colors[vertex] = color;
+                        count++;
+                    }
                 }
             }
-            colors[vertex] = color;
-            // Move the colored vertex to the end and pop it
-            swap(uncolored_vertices[uncolored_vertices.size() - 1], uncolored_vertices[index]);
-            uncolored_vertices.pop_back();
+            color = ++maxcolor;
         }
-
-        if (current_maxcolor < maxcolor)
-            maxcolor = current_maxcolor;
     }
 
     bool Check()
@@ -120,13 +127,13 @@ public:
 
 private:
     vector<int> colors;
-    int maxcolor = std::numeric_limits<int>::max();
+    int maxcolor = 1;
     vector<unordered_set<int>> neighbour_sets;
 };
 
 int main()
 {
-    vector<string> files = { "myciel3.col"};//, "myciel7.col", "latin_square_10.col", "school1.col", "school1_nsh.col",
+    vector<string> files = { "myciel3.col" , "myciel7.col"};//, "latin_square_10.col", "school1.col", "school1_nsh.col",
         // "mulsol.i.1.col", "inithx.i.1.col", "anna.col", "huck.col", "jean.col", "miles1000.col", "miles1500.col",
         // "fpsol2.i.1.col", "le450_5a.col", "le450_15b.col", "le450_25a.col", "games120.col",
         // "queen11_11.col", "queen5_5.col" };
@@ -137,12 +144,8 @@ int main()
     {
         ColoringProblem problem;
         problem.ReadGraphFile(file);
-        int count_iter = 10;
         clock_t start = clock();
-        while (count_iter--)
-        {
-            problem.GreedyGraphColoring();
-        }
+        problem.GreedyGraphColoring();
         if (! problem.Check())
         {
             fout << "*** WARNING: incorrect coloring: ***\n";
