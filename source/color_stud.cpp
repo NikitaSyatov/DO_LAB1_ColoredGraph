@@ -34,7 +34,7 @@ public:
                 string type;
                 line_input >> command >> type >> vertices >> edges;
                 neighbour_sets.resize(vertices);
-                colors.resize(vertices + 1);
+                colors.resize(vertices);
                 for (auto& c : colors)
                 {
                     c = -1;
@@ -67,6 +67,7 @@ public:
         int color = 1;
         int count = 0;
 
+        // per color
         while (count < neighbour_sets.size())
         {
             for (int i = degree_vertices.size()-1; i >= 0; --i)
@@ -92,6 +93,8 @@ public:
             }
             color = ++maxcolor;
         }
+
+        maxcolor -= 1;
     }
 
     bool Check()
@@ -133,10 +136,11 @@ private:
 
 int main()
 {
-    vector<string> files = { "myciel3.col" , "myciel7.col"};//, "latin_square_10.col", "school1.col", "school1_nsh.col",
-        // "mulsol.i.1.col", "inithx.i.1.col", "anna.col", "huck.col", "jean.col", "miles1000.col", "miles1500.col",
-        // "fpsol2.i.1.col", "le450_5a.col", "le450_15b.col", "le450_25a.col", "games120.col",
-        // "queen11_11.col", "queen5_5.col" };
+    vector<string> files = { "myciel3.col" , "myciel7.col", "latin_square_10.col", "school1.col", "school1_nsh.col",
+        "mulsol.i.1.col", "inithx.i.1.col", "anna.col", "huck.col", "jean.col", "miles1000.col", "miles1500.col",
+        "fpsol2.i.1.col", "le450_5a.col", "le450_15b.col", "le450_25a.col", "games120.col",
+        "queen11_11.col", "queen5_5.col" };
+    // vector<string> files = { "queen11_11.col" };
     ofstream fout("../color.csv");
     fout << "Instance; Colors; Time (sec)\n";
     cout << "Instance; Colors; Time (sec)\n";
@@ -153,6 +157,13 @@ int main()
         }
         fout << file << "; " << problem.GetNumberOfColors() << "; " << double(clock() - start) / 1000 << '\n';
         cout << file << "; " << problem.GetNumberOfColors() << "; " << double(clock() - start) / 1000 << '\n';
+
+        // for (auto &it: problem.GetColors())
+        // {
+        //     cout << it << ",\t";
+        // }
+
+        // return 0;
     }
     fout.close();
     return 0;
